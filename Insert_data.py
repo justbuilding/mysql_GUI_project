@@ -9,7 +9,7 @@ class Window(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.title = "PyQt Insert Data"
+        self.title = "PyQt5 Insert Data"
         self.top = 100
         self.left = 100
         self.width = 680
@@ -31,22 +31,22 @@ class Window(QMainWindow):
 
         self.button = QPushButton('插入数据',self)
         self.button.setGeometry(200,250,100,30)
-
+        self.button.clicked.connect(self.InsertData)
 
         self.setWindowTitle(self.title)
         self.setGeometry(self.top,self.left,self.width,self.height)
         self.show()
 
-    def Insert(self):
+    def InsertData(self):
+        con = pymysql.connect("localhost","root","hjj111","travel_database")
 
-        db = pymysql.connect("localhost","root","hjj111","db1")
-        with db:
-            cursor = db.cursor()
-            cursor.execute("insert into data(id,name,pwd)"
-                           "values('%s, %s, %s')" % (''.join(self.lineedit1.text()),
-                                                     ''.join(self.lineedit2.text()),
-                                                     ''.join(self.lineedit3.text())))
-            QMessageBox.about(self,'Connection ')
+        with con:
+            cursor = con.cursor()
+            cursor.execute("INSERT INTO travel_database.admin values('%s', '%s',  '%s')"% (''.join(self.lineedit1.text()),
+                                                                                           ''.join(self.lineedit2.text()),
+                                                                                           ''.join(self.lineedit3.text())))
+            QMessageBox.about(self,'Connection','插入数据成功')
+            self.close()
 
 
 App = QApplication(sys.argv)
