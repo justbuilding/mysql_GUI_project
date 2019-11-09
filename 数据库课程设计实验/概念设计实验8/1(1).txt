@@ -1,0 +1,99 @@
+/* 用 \.执行该文档 */ 
+create database mydatabase11 charset gbk;/*创建数据库并设置为gbk */ 
+alter database mydatabase11 charset gbk;/*更改数据库为gbk */ 
+use mydatabase11;
+
+/* 查看客户端，服务器，连接器的字符集 */ 
+show variables like ‘character_set_%';/*系统中有三个变量来记录着这三个关系对应的字符集*/
+set character_set_client = gbk;
+
+/* 创建整型表 */ 
+create table my_int(
+  int_1 tinyint, /*用一个字节来保存的整形:一个字节 = 8位，最大能表示的数值是0-255,有符号是-128到127 */ 
+  int_2 smallint unsigned, /*用两个字节来保存的整形：unsigned表示无符号，能表示0-65535之间 */ 
+  int_3 mediumint, /*三个字节来保存数据 */ 
+  int_4 int zerofill, /*用四个字节来保存数据,从左填充0，负数时不能用zerofill，一旦使用zerofill就确定unsigned */ 
+  int_5 bigint /*用八个字节来保存数据 */ 
+)charset utf8;
+insert into my_int values(10,10000,100000,1000000,10000000);
+
+/* 创建float,decimal表 ,Double精度也只有15位左右*/ 
+create table my_fd(
+  f_1 float, /*表示不指定小数位的浮点数 */ 
+  f_2 float(10,2), /*整数部分为8位，小数部分为2位,只能保证大概7个左右的精度 */ 
+  d_3 decimal(10,2)/*Decimal定点数：系统自动根据存储的数据来分配存储空间，每大概9个数就会分配四个字节来进行存储，同时小数和整数部分是分开的,涉及到钱的时候有可能使用定点数 */ 
+)charset utf8;
+insert into my_fd values(12345678.90,12345678.90,12345678.90);
+
+/* 创建时间日期类型的数据表
+PHP中有着非常强大的时间日期转换函数：date将时间戳转换成想要的格式，strtotime又可以将很多格式转换成对应的时间戳。PHP通常不需要数据库来帮助处理这么复杂的时间日期，所以通常配合PHP的时候，时间的保存通常使用时间戳（真正），从而用整型来保存。字符串型
+*/ 
+create table my_date(
+  d1 date,
+  d2 time,/*time还可以使用一个简单的日期代替时间，在时间格式之前加一个空格，然后指定一个数字（可以是负）系统会自动将该数字转换成天数 * 24小时，再加上后面的时间*/
+  d3 datatime,
+  d4 timestamp,/*timestamp当对应的数据被修改的时候，会自动更新*/
+  d5 year
+)charset utf8;
+insert into my_data values('1900-01-01','12:12:12','1900-01-01 12:12:12','1900-01-01 12:12:12',2020);
+update my_date set d1 = '2000-01-01' where d5 = 2020;/*timestamp当对应的数据被修改的时候，会自动更新*/
+
+
+
+create table student(
+  Sno char(9) primary key ,    /*主键约束 提示primary key */ 
+  Sname char(20),    /* 唯一约束  提示 unique */ 
+  Ssex char(2) ,  /* 检查约束 提示 性别只能是男或女 check */
+  Sage int , /* 检查约束 提示年龄介于1 到 100之间 check*/
+  Sdept char(20)    /* 缺省 缺省值为CS, default（） */
+ );
+
+alter table student charset=gbk;/*更改表为gbk */ 
+alter table student add age int;/*增加age 列，类型为int *，默认在最后/
+alter table student add id int first;/*增加age 列，类型为int *，first即放在最前/
+alter table student add  pp int after id;/*增加pp列，类型为int ，放在id后*/
+alter table student change age my_name varchar(10); /*改age为my_name，类型改为varchar*/
+alter table student drop my_name;/*删除字段*/
+alter table student drop id;
+alter table student drop pp;
+
+create table Course(
+  Cno char(4), /*主键约束 */
+  Cname char(40), /* 唯一约束 */
+  Cpno char(4) , /*非空约束 提示not null */
+  Ccredit int/* 缺省值为1 */
+ );
+
+create table SC(
+  Sno char(9),
+  Cno char(4),
+  Grade int
+  /* 约束取值为0 到100 * check /
+    /*定义(Sno,Cno)为主键 */
+   /*定义sno为外键参考student表的主键sno,并且实现级联删除更新SC表中相应的元组 */
+   /* 提示 foreign key .. references ... on delete cascade on update cascade,
+   /*定义Cno为外键参考course表的主键Cno,并且实现级联删除SC表中相应的元组 */
+ );
+insert into  student values ('95001','李勇','男',20,'CS');
+insert into student values ('95002', '刘晨','女',19,'IS');
+insert into  student values('95003', '王敏', '女',18, 'MA');
+insert into student values('95004', '张立', '男',19, 'IS');
+insert into student values('95005', '张立', '男',19, 'IS');
+
+delete from student where Sno = '95005';
+update student set Sno =95001 where my_name = '李勇';
+
+
+insert into Course values(1,'数据库', 5,4);
+insert into Course values(2, '数学', 3 ,2);
+insert into Course values(3, '信息系统', 1, 4);
+insert into Course values('4', '操作系统', '6', 3);
+insert into Course values('5', ' 数据结构', '7', 4);
+insert into Course values('6', '数据处理',  '',  2);
+insert into Course values('7',  'PASCAL语言', '6', 4);
+
+insert into SC values('95001', '1', 92);
+insert into SC values('95001', '2', 85);
+insert into SC values('95001', '3', 88);
+insert into SC values('95002', '2', 90);
+insert into SC values('95002', '3', 80);

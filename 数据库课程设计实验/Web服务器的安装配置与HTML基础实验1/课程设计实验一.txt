@@ -1,0 +1,219 @@
+实验一  Web服务器的安装配置与HTML基础
+
+  一、实验目的
+       基于Web的开发是软件开发的主流模式。通过本实验掌握著名的开源Web服务器- Apache Tomcat的安装配置，创建网站的方法及基本的HTML知识。
+	   
+  二、实验原理   
+  	 Web 开发技术一般是基于3层（3 tier  client-Server database）的互联网应用开发。包含下列5个基本组件：
+    1 HTTP 服务器（Web 服务器）: 例如 Apache HTTP Server, Apache Tomcat Server, Microsoft Internet Information Server (IIS), nginx, Google Web Server (GWS)等。
+      Web 服务器是存储、处理及为客户(clients)提供Web 页。通信客户服务器之间的通信协议是超文本传输协议(Hypertext Transfer Protocol,HTTP),页面传递的内容最常用的是HTML(Hypertext Markup Language (HTML))超文本标记语言，所有Web浏览器都可以解析显示文本内容。
+	  
+    2、HTTP 客户 (或 Web 浏览器): 例如Internet Explorer (MSIE), FireFox, Chrome, Safari 等。为客户机所见的形式。
+    3、数据库：开源的 MySQL, Apache Derby, mSQL, SQLite, PostgreSQL, HSQLDB; 商业的 Oracle,MS SQL Server， IBM DB2, SAP SyBase, MS Acces等。
+   4、客户端（前端）编程：HTML（HTML5），JavaScript，VBScript，Flash等
+   5、服务器端（后端）编程：java Servlet/JSP, ASP,PHP, Perl, Python, CGI 等， 后端开发用于与WEb服务器、数据库等进行交互。
+        Apache Tomcat 是 Java兼容的 HTTP 服务器, 是一个Servlet "Java Servlet"和JSP"Java Server Pages (JSP)"容器 可以执行Servlet和JSP.
+	  
+	  
+  三、实验内容及步骤
+  
+    （一）安装tomcat9
+   Tomcat 9 需要JDK8以上，检查是否安装了jdk（在命令窗口输入 java -version ,查看jdk 的版本）,及JAVA_HOME环境变量。
+   
+  1、在E盘创建目录tomcat(或者其他名），用于安装及开发。
+  2、下载tomcat 9
+    http://tomcat.apache.org/
+    下载tomcat9 64bit
+https://tomcat.apache.org/download-90.cgi
+  64-bit Windows zip (pgp, sha1, sha512) 
+apache-tomcat-9.0.10-windows-x64.zip
+  解压缩，查看Tomcat的目录结构
+  1）bin: 包含了启动服务器的脚本， startup.bat, 关闭服务器的脚本shutdown.bat 等
+  2) conf: 系统配置文件： server.xml, web.xml, context.xml,tomcat-users.xml等
+  3) webapps:所有应用包的发布目录，可以直接放置 WAR (Webapp Archive) 文件，将自动解压缩配置
+  4) lib: 所有系统jar及第三方的jar,例如jdbc 驱动。
+  5) logs: 包含日志文件，可以查看所有错误信息。
+  6) work:Tomcat JSP工作目录，用于JSP到servlet 转换。
+ 
+  3.配置Tomcat服务器
+   1）设置TCP端口
+     用记事本打开 “conf\server.xml”文件，缺省是端口是8080，将其改变为9999（ port number between 1024 and 65535.）
+修改文件为：
+
+    <Connector port="9999" protocol="HTTP/1.1"
+           connectionTimeout="20000"
+           redirectPort="8443" />
+		   
+   2）修改用户名及密码
+     打开文件 conf/tomcat-users.xml 
+    去掉<! --   -->的注释，再增加 admin 的密码
+   
+<tomcat-users>
+<!--
+  <role rolename="tomcat"/>
+  <role rolename="role1"/>
+  <user username="tomcat" password="tomcat" roles="tomcat"/>
+  <user username="both" password="tomcat" roles="tomcat,role1"/>
+  <user username="role1" password="tomcat" roles="role1"/>
+-->
+
+	<role rolename="manager-gui"/>
+	<user username="admin" password="admin" roles="manager-gui"/>
+
+</tomcat-users>
+
+  3）设置代码改变后自动重载 "conf\context.xml" - Enabling Automatic Reload
+ <Context reloadable="true">
+   ......
+   ......
+ </Context>
+
+ 4）启动服务器
+   在tomcat/bin 目录下，执行startup
+
+ 5）用任何一种浏览器IE、firfox等 访问服务器
+  在浏览器地址栏中输入
+      http://localhost:9999
+  正常出现一个主页。
+    在主页中了解tomcat 的示例。
+ 6）测试管理页面
+    在主页点击 “Manager App” 按钮，将跳出需要“用户名”，“密码”的窗口，输入设置的密码，进入系统。
+	
+ 7）关闭服务器
+   在tomcat/bin 目录下，执行shutdown
+
+  二）、创建测试程序 -HTML
+  在webapp的目录下创建一个测试目录test1
+  
+http://localhost:9999/test1/testhtml1.html 
+
+1.最简单的HTML页面
+   用下列内容在记事本中创建保存为test1.html,测试 localhost:9999/test1/test1.html
+     
+   <html>
+       嘉应学院数据库课程设计，实验一Tomcat安装测试。
+	   我是1602班的***，学号是*******
+   <html>
+    与临近同学相互调用主页:
+	   查看IP地址，在命令窗口输入 ipconfig,可查看本机IP地址。
+   用http://其他同学的IP:9999/test1/test1.html 调用其他同学的测试页面。
+   
+2. 带格式的页面
+    用下列内容在记事本中创建保存为test2.html,测试 localhost:9999/test1/test2.html
+    <html>
+	 <p>
+       <b>嘉应学院数据库课程设计，实验一Tomcat安装测试。</b>
+	 </p>
+	 <p>
+	   <h2>我是1602班的***，学号是*******</h2>
+	 </p>
+   <html>
+   
+
+3 超链接
+       用下列内容创建超链接文件，文件名为hlink1.html ,测试 localhost:9999/test1/hlink1.html
+<html>
+<body>
+<p>
+<a href="/examples">本文本</a> 是一个指向本网站中上一级路径页面的链接。</p>
+<a href="test2.html">本文本</a> 是一个指向本网站中的同级路径页面的链接。</p>
+<p><a href="http://tomcat.apache.org/">web 网</a> Tomcat官方网的链接。</p>
+
+</body>
+</html>
+  
+  4 表格
+  
+  用下列内容创建表格，文件名为tab1.html ,测试 localhost:9999/test1/tab1.html
+  
+  <html>
+
+<body>
+
+<h4>表头：</h4>
+<table border="1">
+<tr>
+  <th>姓名</th>
+  <th>电话</th>
+  <th>电话</th>
+</tr>
+<tr>
+  <td>Bill Gates</td>
+  <td>555 77 854</td>
+  <td>555 77 855</td>
+</tr>
+</table>
+
+<h4>垂直的表头：</h4>
+<table border="1">
+<tr>
+  <th>姓名</th>
+  <td>Bill Gates</td>
+</tr>
+<tr>
+  <th>电话</th>
+  <td>555 77 854</td>
+</tr>
+<tr>
+  <th>电话</th>
+  <td>555 77 855</td>
+</tr>
+</table>
+
+</body>
+</html>
+
+
+ 5.表单form 
+    用下列内容创建表单，文件名为form1.html ,测试 localhost:9999/test1/form1.html
+	注意charset 的字符集的设置，中文容易出现乱码。
+ <!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='Content-Type' content='text/html; charset=gb2312'>
+  <title>用户输入表单 User Input Form</title>
+</head>
+ 
+<body>
+<h2>用户输入表单</h2>
+<form method="get" action="echo">
+  <fieldset>
+    <legend>个人信息</legend>
+    姓名: <input type="text" name="username" /><br /><br />
+    密码: <input type="password" name="password" /><br /><br />
+    性别: <input type="radio" name="gender" value="m" checked />男
+    <input type="radio" name="gender" value="f" />女<br /><br />
+    年龄: <select name = "age">
+      <option value="1">&lt; 1 岁</option>
+      <option value="99">1 到 99 岁</option>
+      <option value="100">&gt; 超过99 岁</option>
+    </select>
+  </fieldset>
+ 
+  <fieldset>
+    <legend>编程语言</legend>
+    <input type="checkbox" name="language" value="java" checked />Java
+    <input type="checkbox" name="language" value="c" />C/C++
+    <input type="checkbox" name="language" value="cs" />C#
+  </fieldset>
+ 
+  <fieldset>
+    <legend>介绍</legend>
+    <textarea rows="5" cols="30" name="instruction">输入你的介绍...</textarea>
+  </fieldset>
+ 
+  <input type="hidden" name="secret" value="888" />
+  <input type="submit" value="发送" />
+  <input type="reset" value="清除" />
+</form>
+</body>
+</html>
+	 
+  四、实验作业及报告要求
+  1.请课后认真参考下列网，学习HTML等知识。 
+  http://www.w3school.com.cn/
+  2.预习Java Servlet 知识
+  3.完成实验报告，下一次实验课提交。
+  
+  
+  

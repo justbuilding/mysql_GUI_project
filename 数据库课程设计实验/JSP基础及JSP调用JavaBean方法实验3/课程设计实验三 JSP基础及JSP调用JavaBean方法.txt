@@ -1,0 +1,367 @@
+课程设计实验三 JSP基础及JSP调用JavaBean方法
+
+  一、实验目的
+        JavaServer Pages（JSP）是服务器端的编程语言，通过实验掌握Java服务器端的JSP开发技术。
+   二、实验原理
+      JavaServer Pages（JSP） JSP 的具有下列优点
+        1.动态与静态内容分离
+        2.重用组件(JavaBean,EJB)和标签库(Tag Lib)
+        3.充分发挥Java的强大威力
+       JSP 在内部被编译成Java Servlets (Servlet 是 HTML inside Java), JSP 是Java Inside HTML
+    在模型-视图-控制MVC（Model-View-Control）设计模式中,JSP 一般用于视图表现层（用户可见界面接口），Servlet作为控制器（包含复杂的编程逻辑）
+，用JavaBean or EJB 实现模型。
+     ## JSP的指令
+   JSP指令
+JSP指令用来设置与整个JSP页面相关的属性。
+  JSP指令语法格式：
+<%@ directive attribute="value" %>
+这里有三种指令标签：
+指令 	                    描述
+<%@ page ... %> 	定义页面的依赖属性，比如脚本语言、error页面、缓存需求等等
+<%@ include ... %> 	包含其他文件
+<%@ taglib ... %> 	引入标签库的定义，可以是自定义标签
+
+
+
+JSP 动作标签
+
+JSP动作标签使用XML语法结构来控制servlet引擎。它能够动态插入一个文件，重用JavaBean组件，引导用户去另一个页面，为Java插件产生相关的HTML等等。
+
+动作标签只有一种语法格式，它严格遵守XML标准：
+<jsp:action_name attribute="value" />
+
+语法 	描述
+jsp:include 	用于在当前页面中包含静态或动态资源
+jsp:useBean 	寻找和初始化一个JavaBean组件
+jsp:setProperty 	设置 JavaBean组件的值
+jsp:getProperty 	将 JavaBean组件的值插入到 output中
+jsp:forward 	从一个JSP文件向另一个文件传递一个包含用户请求的request对象
+jsp:plugin 	用于在生成的HTML页面中包含Applet和JavaBean对象
+jsp:element 	动态创建一个XML元素
+jsp:attribute 	定义动态创建的XML元素的属性
+jsp:body 	定义动态创建的XML元素的主体
+jsp:text 	用于封装模板数据
+
+JSP内置对象（9个）
+对象 	描述
+request 	HttpServletRequest类的实例
+response 	HttpServletResponse类的实例
+out 	        PrintWriter类的实例，用于把结果输出至网页上
+session 	HttpSession类的实例
+application 	ServletContext类的实例，与应用上下文有关
+config 	       ServletConfig类的实例
+pageContext 	PageContext类的实例，提供对JSP页面所有对象以及命名空间的访问
+page 	        类似于Java类中的this关键字
+Exception 	Exception类的对象，代表发生错误的JSP页面中对应的异常对象
+
+
+
+ 三、实验环境
+       操作系统： win7 
+     开发环境：JDK8；Web 服务器： Tomcat9；浏览器：IE、firefox等
+	   
+   四、实验内容方法
+   
+   (一）JSP基础
+
+     JSP编程结构
+	  JSP 是Java Inside HTML，Servlet 是 HTML inside Java
+	   回顾实验二的Servlet 程序开发
+	   
+	   用编辑器编写下列文件，命名为test1.jsp
+	   
+	  <%@ page contentType="text/html;charset=GB2312" %>
+      <%@ page import="java.util.*"%>  
+        <!DOCTYPE html>
+     <html><head>
+        
+         <title>你好！ 数据库课程设计</title></head>
+         <body>
+         <h1>你好！ 数据库课程设计</h1>  
+         // 获得客户请求信息
+         <p>请求的URI: <%= request.getRequestURI() %> </p>
+         <p>协议: <%= request.getProtocol() %></p>
+         <p>路径信息: <%=  request.getPathInfo() %></p>
+         <p>远程地址: <%=  request.getRemoteAddr() %></p>
+         // 生成随机数
+         <p>一个随机数: <strong> <%= Math.random() %></strong></p>
+         </body>
+       <body>
+             <% 
+                double num = Math.random();
+                 if (num > 0.95) {
+              %>
+                 <h2>大随机数,超过0.95 </h2><p>(<%= num %>)</p>
+             <%
+                 } else {
+
+              %>
+        <h2>随机数低于0.95 </h2><p>(<%= num %>)</p>
+        <%
+            }
+         %>
+       </body>
+     </html>
+ 
+ 程序解析：	   
+	JSP 定向Directive <%@ page|include ... %>
+        <%@ page contentType="text/html;charset=GB2312" %>
+      <%@ page import="java.util.*"%> 
+	  
+	JSP Java表达式 Expression <%= Java 表达式 %>
+	 JSP Java代码片Scriptlet <% Java 代码 %>   	   
+    JSP 注释 <!--注释-->
+    
+  按实验二的方法，将test1.jsp文件打包到war中，并发布。
+  或者在tomcat webapp目录下新建testjsp 目录，将test1.jsp 放置到此目录下。
+  调用: http://localhost:8080/testjsp/test1.jsp
+
+  test1.jsp
+
+在下列work目录下自动生成test1_jsp.java 文件，并且编译成为test1_jsp.class
+	  在此目录中找到相关文件
+apache-tomcat-9.0.10\work\Catalina\localhost\testJSP\org\apache\jsp
+打开test1_jsp.java 源文件，比较与Servlet 程序的差别。
+
+   比较Servlet JSP开发及部署都较简单，（Servlet 开发：编译源代码->编写web.xml servlet 映射)
+      JsP 可以直接在服务器上修改JSP文件，并且立即生效。
+
+
+ test1.jsp 程序中嵌入了Java代码，将Java代码分离出来，编辑成test1.java ，如下
+import java.util.*;
+
+  class test1{
+     public static void main(String[] args){
+        
+            double num = Math.random();
+                 if (num > 0.95) {
+                      System.out.println("大随机数,超过0.95 " + num );
+
+                 } else {
+
+               System.out.println("随机数低于0.95 " +  num); 
+
+                }
+      }//main
+  }//class
+  
+  
+  
+  用编辑器编写test1.java 文件， 编译 javac test1.java, 执行java test1
+  
+  （二）JSP调用JavaBean
+    
+	JavaBean是特殊的Java类，是用Java编写的可重用组件，并且遵守JavaBeans API规范。
+    JavaBean特征：
+    提供一个默认的无参构造函数；
+    需要被序列化并且实现了Serializable接口；
+    可能有一系列可读写属性；
+    可能有一系列的"getter"或"setter"方法。
+
+	实体Bean，EJB， Hibernate 对象映射。
+	数据库的实体关系与面向对象的实体对象？
+
+	调用JavaBean
+	创建 testbean.jsp
+	
+	<%@ page contentType="text/html;charset=GB2312" %>
+<html>
+<head>
+<title>useBean 例子</title>
+</head>
+<body>
+
+<jsp:useBean id="date" class="java.util.Date" /> 
+<p>今天的日期时间是  <%= date %>
+
+</body>
+</html>
+
+
+
+1.创建自己的JavaBean - StudentsBean
+  StudentsBean.java  在classes 目录下创建子目录mypkg，将StudentsBean.java 放到该子目录下。
+  打开命令行窗口(cmd), 切换到classes目录下， 编译程序javac mypkg\*.java
+  
+
+package mypkg;
+
+public class StudentsBean implements java.io.Serializable
+{
+   private String firstName = null;
+   private String lastName = null;
+   //private int age = 0;
+   private String age =null;
+   public StudentsBean() {
+   }
+   public String getFirstName(){
+      return firstName;
+   }
+   public String getLastName(){
+      return lastName;
+   }
+   public String getAge(){
+      return age;
+   }
+   public void setFirstName(String firstName){
+      this.firstName = firstName;
+   }
+   public void setLastName(String lastName){
+      this.lastName = lastName;
+   }
+ 
+    public void setAge(String age){
+      this.age = age;
+   }
+   
+}
+
+  
+
+2.用JSP调用  JavaBean - StudentsBean
+  
+  用下列代码 创建student.jsp，放置到testjsp 目录下
+  调用localhost:9999/testjsp/student.jsp
+  
+  
+   <%@ page contentType="text/html;charset=GB2312" %>
+<html>
+<head>
+<title>get and set properties Example 例子</title>
+</head>
+<body>
+
+<jsp:useBean id="students"  class="mypkg.StudentsBean"> 
+   <jsp:setProperty name="students" property="firstName"  value="章"/>
+   <jsp:setProperty name="students" property="lastName"   value="飞飞"/>
+   <jsp:setProperty name="students" property="age"     value="10"/>
+</jsp:useBean>
+
+<p>Student First Name姓: 
+   <jsp:getProperty name="students" property="firstName"/>
+</p>
+<p>Student Last Name名: 
+   <jsp:getProperty name="students" property="lastName"/>
+</p>
+<p>Student Age 年龄: 
+   <jsp:getProperty name="students" property="age"/>
+</p>
+
+</body>
+</html>
+
+
+将jsp:useBean id="students"   ,id 改为 stu2,并改造student.jsp
+
+3.创建猜数游戏JavaBean
+
+   创建程序 NumberGuessBean.java
+  在classes 目录下创建子目录mypkg，将NumberGuessBean.java 放到该子目录下。
+  打开命令行窗口(cmd), 切换到classes目录下， 编译程序javac mypkg\*.java
+  
+
+
+package mypkg;            
+import java.util.Random;  
+import java.io.Serializable;
+  
+
+public class NumberGuessBean implements Serializable {
+  
+   private int answer;       
+   private boolean success;  
+   private String hint;      
+   private int numGuesses;   
+   private Random random;    
+  
+  
+   public NumberGuessBean() {
+      random = new Random(); 
+      reset();
+   }
+  
+  
+   public void reset() {
+      // 生成1 到 100 之间的随机数
+      answer = random.nextInt(100) + 1;
+      success = false;
+      numGuesses = 0;
+   }
+  
+   public void setGuess(String strIn) {
+      ++numGuesses;  
+  
+      int numIn;
+      
+      try {
+         numIn = Integer.parseInt(strIn);
+      } catch (NumberFormatException e) {
+         hint = "a number next time";
+         return;
+      }
+  
+      if (numIn == answer) {
+         success = true;
+      } else if (numIn < answer) {
+         hint = "太低";
+      } else if (numIn > answer) {
+         hint = "太高";
+      }
+   }
+  
+   
+   public boolean isSuccess() { return success; }
+   public String getHint() { return hint; }
+   public int getNumGuesses() { return numGuesses; }
+}
+
+
+
+ 4.调用猜数游戏的JSP
+   创建 guessnum.jsp ，放置在testjsp目录下
+ 
+ 
+ <%@ page contentType="text/html;charset=GB2312" %>
+<%@page import = "mypkg.NumberGuessBean" %>
+<jsp:useBean id="numguess" class="mypkg.NumberGuessBean" scope="session" />
+<jsp:setProperty name="numguess" property="*"/>
+  
+<html>
+<head><title>猜数游戏</title></head>
+<body>
+
+<%
+if (numguess.isSuccess()) {    
+%>
+  <p>祝贺通过 <%= numguess.getNumGuesses() %> 次</p>
+  <% numguess.reset(); %>
+  <p><a href="<%= request.getRequestURI() %>">再试</a></p>
+<%
+} else {
+  if (numguess.getNumGuesses() == 0 ) {   
+%>
+    <p>欢迎进入猜数游戏.</p>
+<%
+  } else {   // 
+%>
+    <p>Good guess, but nope. Try <strong><%= numguess.getHint() %></strong>.</p>
+    <p>你已经猜了You have made <%= numguess.getNumGuesses() %> 次.</p>
+<%
+  }
+%>    
+ 
+  <p>估计数在1-100之间<p>
+  <form method="get">
+    <p>输入猜的数? <input type="text" name="guess">
+    <input type="submit" value="Submit">
+  </form>
+<%
+}
+%>
+</body>
+</html>
+
+
+思考： jsp 与 Servlet 程序开发的异同。
+   下一次实验是jsp+servlet +jdbc  及MVC方法 
+   

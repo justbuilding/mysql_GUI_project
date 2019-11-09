@@ -1,0 +1,150 @@
+
+ 实验8 概念设计1
+
+ 一、实验目的
+    通过本实验掌握从需求分析中识别、获得实体及实体之间关系的方法，建立数据库的概念模型。掌握用可视化IDE工具 MYSQL Workbench 建立模型的方法及正向工程及反向工程方法。
+   二、实验原理
+    不论是用传统的结构化分析方法（数据流图+数据字典）还是面向对象的统一建模（UML）方法（用例图+用例文档+活动图）都是用直观图示方法描述了系统的业务功能，可较精确地进行需求分析。从需求中进一步分析识别、获得实体及实体之间关系，或者从中识别出系统的概念类，对系统进行分析阶段的静态建模（领域建模，类对象建模）。
+     实体关系图（ER图）包括实体、实体之间的关系，实体关系又包括1：1，1：N，M：N 关系约束。
+     类之间关系较复杂包括 关联、依赖、泛化等关系。
+    实体关系图 与 实体类对象模型应该存在对应关系。
+
+ 三、实验环境
+       操作系统： win7 
+     开发环境：数据库管理服务器 MYSQL 5.5，mysql IDE 管理平台 MySQL Workbench 5.2.44 CE
+	   
+ 四、实验内容方法
+   1. 了解MySQL WorkBeanch 5.5 
+      MySQL WorkBeanch 5.5  是MySQL 综合管理平台，包括下面三部分
+      1）SQL Development :可视化的查询分析平台，管理数据库对象。
+      2) Data Modeling： 可视化ER建模平台，可以实现正向工程及反向工程。
+      3) Server Administration ：配置管理数据库服务器
+     本实验采用Data Modeling 部分建立ER模型。
+      1）检查MySQL服务器是否开启
+          mysql -u root -p
+          密码为空
+         如果报无法连接数据库服务器，用下面的命令启动：
+        mysqld --console
+
+      2)在E盘下建立目录 mysqlwork
+         将老师提供的压缩包解压到此目录下，
+           在目录 Workbench 5.2.44 CE下 双击 MySQLWorkbench.exe 进入系统。
+        
+
+  2.正向工程建模
+      
+    根据下列需求建立模型
+       一个专业只有一个班，每个班有多个学生，每个学生可以修多门课， 每门课可以多个学生选。
+      结合上一次实验的数据字典实验的方法确定数据类型
+        专业
+           Major（MID int,  //专业编号
+                  Mname char(20) //专业名
+                  ）
+        班级
+           Class(CID int, //班级编号
+                Cname char(20),//班级名
+                Cnum int //班级人数  
+                )
+        学生
+          Student(StuID int, //学号
+                  Sname char(10),//姓名
+                  Sage int //年龄
+               ）
+        课程
+           Course(CourID int, //课程ID
+                  CoursName char(20) //课程名
+                 ）
+在中间  Data Modeling下，点击 Create new EER Model 进入模型设计界面。
+   在模型设计界面(Model Overview)下双点击"Add Diagram" 进入ER图设计界面。
+  在diagram 下的左边菜单栏中，找到中间“place a new table”菜单，点击该菜单，在最上面出现模型的基本设置
+  Schema: mydb
+  Engine: InnoDB
+  Collation:
+ 开始按缺省，后面可以修改。
+
+  第一步：建立实体
+在中间空白部分点击，将出现table1 的方框，双击此方框，将在下面出现表的编辑界面，
+  此时根据实际 分别建立专业、班级、学生、课程等实体
+   如专业
+     将table name 改为Major
+     Columns 部分加入表的属性
+   
+ 第二步： 建立实体之间的联系
+     1:1 - Non - Identifying Relationship
+     1:n - Non - Identifying Relationship
+     1:1 - Identifying Relationship
+     1:n - Identifying Relationship
+     n:m - Identifying Relationship
+     1:n - Using exists Column
+
+                  
+ 1：1 与 1:N 有两种选择  Non - Identifying Relationship 及 Identifying Relationship   
+ 1：N 先点多的表，再点1表
+
+ M:N 将自动在两表之间建立一个新表。例如在Student 与 Course之间 新表 Student_has_Course
+  并且自动建立两个属性
+      Student_StuID INT
+      Course_CourID INT
+
+按下列两种方式，建立两个模型，分别保存为test1.sql, 及test2.sql ,  
+   1）. 专业 -班级之间 1:1 选 Non - Identifying Relationship，班级-学生 1:N 选择 Non - Identifying Relationship ,学生-课程 M:N 
+   2）. 专业 -班级之间 1:1 选 Identifying Relationship，班级-学生 1:N 选择 Identifying Relationship ,学生-课程 M:N 
+
+
+  第三步 将模型输出sql 
+    在File -> Export -> Forward Engineer SQL Create Script
+   在SQL Export Options 
+      Output SQL Script File:        Browse 选择要保存的文件名及目录
+    例如  在 E盘mysqlwork目录下 文件名 test1
+    将ER图保存为png 格式文件
+  
+  比较test1.sql,test2.sql 的异同。
+    
+   3 反向工程
+    第一步：创建需要做反向工程的数据库 
+          用老师提供的脚本 trade_script.sql （将此脚本文件放置到e:\mysqlwork\目录下） 生成数据库 trade1
+         mysql>source e:\mysqlwork\trade_script.sql
+       将自动生成数据库trade1
+
+   第二步 反向工程 ER模型 
+      在MySQLWorkbench平台的 Data Modeling 中选择 Create EER Model from Existing DataBase    
+       按提示选择数据库trade1 ,将自动生成ER图。
+   
+   要求 根据数据库脚本在word或者Viso或者纸中画出trade1数据库的ER图 与平台生成的数据库进行比较。 
+ 
+  8张表的属性如下
+  
+  1） Products -产品表 
+    ProductID -产品ID， ProductName -产品名称，  SupplierID -供应商ID，	CategoryID -类别ID，QuantityPerUnit -单位数量
+    UnitPrice -单价，UnitsInStock -库存量，	UnitsOnOrder -订购量，	ReorderLevel -再订购量，Discontinued -中止
+
+  2） Orders -订单
+   OrderID -订单ID，CustomerID -客户ID，	EmployeeID -雇员ID，	OrderDate -订购日期，	RequiredDate -到货日期，ShippedDate -发货日期，	
+  ShipVia -运货商，	Freight -运货费，	ShipName -货主名称，	ShipAddress -货主地址，	ShipCity -货主城市，	ShipRegion -货主地区，	
+  ShipPostalCode -货主邮政编码，	ShipCountry -货主国家
+
+   3） OrderDetails -订单明细
+    OrderID -订单ID，	 ProductID -产品ID，	UnitPrice -单价，	Quantity -数量，	Discount -折扣
+
+   4） Suppliers - 供应商表
+    SupplierID -供应商ID, CompanyName -公司名称, ContactName -联系人姓名,ContactTitle -联系人职务,	Address -地址,	City -城市,	Region -地区,	PostalCode -邮政编码, Country -国家, Phone -电话, Fax -传真, HomePage -主页
+	
+   5） Employees -雇员表  
+   EmployeeID 雇员ID,  LastName -姓氏,  FirstName -名字,	Title -职务,	TitleOfCourtesy -尊称,	BirthDate -出生日期,	HireDate雇用日期,	
+  Address -地址, City -城市, Region -地区,	PostalCode -邮政编码, Country -国家, HomePhone -家庭电话,	Extension -分机, Notes -备注, ReportsTo -上级
+
+    6） Customers -客户表
+    CustomerID -客户ID,	CompanyName -公司名称,	ContactName -联系人姓名, ContactTitle -联系人职务,	Address -地址,	City-城市,	
+    Region -地区,	PostalCode -邮政编码, Country -国家,	Phone -电话,	Fax -传真
+	
+   7） Categories -类别表 
+    CategoryID -类别ID, CategoryName -类别名称,	Description -说明
+	
+    8） Shippers -运货商表
+    ShipperID -运货商ID，CompanyName -公司名称，Phone -电话
+
+   
+ 五、扩展实验
+     根据数据库trade 建立实体类对象模型。
+    下一次实验，每位同学提供项目进展报告（重点说明项目碰到的问题）如果有项目原型，演示项目
+    

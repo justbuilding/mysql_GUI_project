@@ -1,0 +1,77 @@
+课程设计实验四 通过JDBC连接数据库
+
+  一、实验目的
+     通过实验了解JDBC原理，掌握通过JDBC 应用命令行、JSP 及Servlet 连接数据库的方法。
+    
+   二、实验原理
+
+      JDBC的接口和类
+   （1）Connection，用于一个特定的数据库连接。
+   （2）PreparedStatement, 用于执行带或不带参数的预编译SQL语句。
+   （3）ResultSet, 当执行SQL语句后的返回结果集。
+    (4) Staement对象用于将SQL语句发送到数据库中。
+        executeQuery(String sql); executeUpdate(String sql); execute(String sql); close()等。
+   （5）DriverManager
+     调用方法：Class.forName //加载DRIVER
+     建立连接：DriverManager.getConnection
+   参考JDBC 调用图
+
+  三、实验平台
+       Win7, mysql >=5.5,jdk >=7 ，tomcat >=8
+   
+  四、实验内容及方法
+      
+     （一）在 Mysql 上建立数据库
+       1. mysql 基本操作方法
+	    启动mysql 服务器
+	     mysqld --console  
+		 
+          mysql -u root -p 回车
+          password (密码为空)
+  mysql> ? 帮助
+        status;
+       show databases;
+       use dbname;
+       show tables;
+       desc tablename;
+      
+       drop database dbname;
+       drop table tablename;
+
+    在E盘建立自己的工作目录db, 用下列内容创建数据库脚本testdb.sql 
+
+Create database Testdb default character set gbk;
+use Testdb;
+
+create table products(
+	id int,
+	category char(6),
+	name varchar(20),
+	quantity int,
+	price float);
+
+ insert into products values(1001,'钢笔','红色钢笔',500,1.23);
+        insert into products values(1002,'钢笔','蓝色钢笔',800,1.25);
+        insert into products values(1003,'钢笔','黑色钢笔',200,1.26);
+insert into products values(1004,'钢笔','白色钢笔',900,1.27);
+insert into products values(1005,'铅笔','2B铅笔',1000,0.56);
+insert into products values(1006,'铅笔','2H铅笔',600,0.58);
+
+
+在mysql 上调用该脚本创建数据库：
+mysql>source e:\db\testdb.sql
+
+  (二） 建立数据库连接
+    下载mysql jdbc 驱动 mysql-connector-java-5.1.47.zip
+    解压缩 ，将 mysql-connector-java-5.1.47-bin.jar 放置在已创建的目录e:\common_lib下
+      
+
+     1.命令行方式        
+                	executeQuery， executeUpdate 方法
+     2. servlet 方式
+     3. JSP方式
+
+
+   ant 自动打包方式
+  两个著名的平台， Eclipse， Netbeans
+  

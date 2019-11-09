@@ -1,0 +1,408 @@
+
+实验二、Servlet 程序设计
+
+   一、实验目的
+        Java servlets是服务器端的编程语言，通过实验掌握Java服务器端的Servlet开发技术。
+   二、实验原理
+     Java servlets是服务器端的编程语言，是JavaEE重要的标准，可以处理客户端的请求，为每个请求实现定制的或者动态的响应。Java Servlet 运行在HTTP协议之上，HTTP是异步请求-响应协议。
+	 Servelet 生命周期
+	 1.  init() 方法
+	    只调用一次，当servelt 创建时
+             public void init() throws ServletException {
+                 // 开始代码
+            }
+   2.service() 方法
+     service()检查HTTP request头类型 (GET, POST, PUT, DELETE, 等.) 调用 doGet, doPost, doPut, doDelete, 等方法.
+	 public void service(ServletRequest request, ServletResponse response) 
+               throws ServletException, IOException {
+            }
+    doGet, doPost 是最常用的方法。
+	
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+              throws ServletException, IOException {
+       // Servlet code
+     } 
+		
+		3.destroy() 方法 也只是调用一次，结束Servlet 时
+		public void destroy() {
+           // Finalization code...
+        }
+	 
+	编写servlet程序的步骤
+    1.继承HttpServlet
+    2.重写service方法，doGet()或者doPost()方法   （一般省去int(),destroy())
+    3.在web.xml中注册Servlet；JavaEE6及其以上可以使用注释来对servlet进行注册 。
+	
+	Servlet 处理表单数据，这些数据会根据不同的情况使用不同的方法自动解析：
+
+    getParameter()：您可以调用 request.getParameter() 方法来获取表单参数的值。
+    getParameterValues()：如果参数出现一次以上，则调用该方法，并返回多个值，例如复选框。
+    getParameterNames()：如果您想要得到当前请求中的所有参数的完整列表，则调用该方法。
+
+		 
+   三、实验环境
+       操作系统： win7 
+     开发环境：JDK8；Web 服务器： Tomcat9；浏览器：IE、firefox等
+	   
+   四、实验内容方法
+      
+	  了解Web 应用目录结构
+	    如新应用Servelt1
+	     webapps 下新建目录结构
+		 Servelt1
+	        -WEB-INF
+		    --classes
+			--lib
+		   web.xml
+		  -META-INF 
+		    context.xml
+		 index.html
+		 *.html,*.jsp
+		 
+		   classes 目录下放置java 源程序
+		   lib 目录下放置第三方库
+		   web.xml 为应用服务的配置（servlet 映射配置）
+		   context.xml 为资源池配置（例如jdbc 对象池）
+	  
+	  （一）.简单的Sevlet HelloServlet
+	  
+	   在E盘 创建目录servelt1
+	     （老师提供缺省包，解压缩即可）
+        在classes 目录下，用下列的源代码建立HelloServlet.java 文件
+		
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+ 
+//继承HttpSerlet
+public class HelloServlet extends HttpServlet {
+   @Override
+   public void doGet(HttpServletRequest request, HttpServletResponse response)
+               throws IOException, ServletException {
+      // 设置发送信息的字符集 
+      response.setContentType("text/html;charset=gb2312");
+      // 创建写输出的对象 out 
+      PrintWriter out = response.getWriter();
+ 
+      // 用HTML写响应信息 
+      try {
+         out.println("<!DOCTYPE html>");
+         out.println("<html><head>");
+         out.println("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
+         out.println("<title>你好！ 数据库课程设计</title></head>");
+         out.println("<body>");
+         out.println("<h1>你好！ 数据库课程设计</h1>");  // says Hello
+         // 获得客户请求信息
+         out.println("<p>请求的URI: " + request.getRequestURI() + "</p>");
+         out.println("<p>协议: " + request.getProtocol() + "</p>");
+         out.println("<p>路径信息: " + request.getPathInfo() + "</p>");
+         out.println("<p>远程地址: " + request.getRemoteAddr() + "</p>");
+         // 生成随机数
+         out.println("<p>一个随机数: <strong>" + Math.random() + "</strong></p>");
+         out.println("</body>");
+         out.println("</html>");
+      } finally {
+         out.close();  
+      }
+
+   }
+}
+
+阅读上述关键代码。
+
+  2.编译源代码
+  在Tomcat的lib 目录下找到  servlet-api.jar，将完整的路径加入到java 的classpath中，使javac 能找到 servlet-api.jar
+  在classes 目录下编译文件 javac HelloServlet.java
+或者创建目录common_lib ，放置所有第三方的库，
+//javac -cp .;E:\common_lib\servlet-api.jar HelloServlet.java
+
+
+3. 修改web.xml
+      特别注意 类名不能错 HelloServlet； 映射名/sayhello 要记住
+	  
+ <web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+ 
+   <servlet>
+      <servlet-name>HelloWorldServlet</servlet-name>
+      <servlet-class>HelloServlet</servlet-class>
+   </servlet>
+  
+   <servlet-mapping>
+      <servlet-name>HelloWorldServlet</servlet-name>
+      <url-pattern>/sayhello</url-pattern>
+   </servlet-mapping>
+</web-app>
+
+4.打包成 *.war 文件 （压缩文件，放置到tomcat 的webapp下会自动解压缩）
+   加入目录Servlet1 下， 输入jar 命令用于打包
+     Servlet1>jar -cvf Servelt1.war *
+	 * 代表本目录下的内容全部打包。
+	 
+5.启动tomcat 服务器
+   在tomcat bin 目录下 输入： startup 将启动服务器
+   
+ 6. 发布应用程序
+    进入主页
+      在浏览器中输入本地地址localhost:9999
+	  出现主页 点击Manager App 按钮，将进入管理页面
+    找到 WAR file to deploy
+          Select WAR file to upload 	点击浏览 找到已经打包好的Servlet1.war 文件
+		  再点击deploy 发布即可
+		  
+	在应用清单中，找到刚刚发布的程序，查看状态，正常情况下显示 true,
+	可以通过Star, Stop, Reload, Undeploy 对应用程序进行管理。
+	
+http://localhost:9999/Servlet1/sayhello
+
+
+
+
+（二） servelt 处理表单数据
+    
+	 1.建立表单 form1.html
+	 在Servlet1的根目录下，用下列代码创建文件form1.html
+	 
+	 <!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='Content-Type' content='text/html; charset=gb2312'>
+  <title>用户输入表单 User Input Form</title>
+</head>
+ 
+<body>
+<h2>用户输入表单</h2>
+<form method="post" action="echo">
+  <fieldset>
+    <legend>个人信息</legend>
+    姓名: <input type="text" name="username" /><br /><br />
+    密码: <input type="password" name="password" /><br /><br />
+    性别: <input type="radio" name="gender" value="m" checked />男
+    <input type="radio" name="gender" value="f" />女<br /><br />
+    年龄: <select name = "age">
+      <option value="1">&lt; 1 岁</option>
+      <option value="99">1 到 99 岁</option>
+      <option value="100">&gt; 超过99 岁</option>
+    </select>
+  </fieldset>
+ 
+  <fieldset>
+    <legend>编程语言</legend>
+    <input type="checkbox" name="language" value="java" checked />Java
+    <input type="checkbox" name="language" value="c" />C/C++
+    <input type="checkbox" name="language" value="cs" />C#
+  </fieldset>
+ 
+  <fieldset>
+    <legend>介绍</legend>
+    <textarea rows="5" cols="30" name="instruction">输入你的介绍...</textarea>
+  </fieldset>
+ 
+  <input type="hidden" name="secret" value="888" />
+  <input type="submit" value="发送" />
+  <input type="reset" value="清除" />
+</form>
+</body>
+</html>
+
+
+2.创建处理表单的Servlet 程序 EchoServlet.java
+   import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.util.*;
+ 
+public class EchoServlet extends HttpServlet {
+ 
+   @Override
+   public void doGet(HttpServletRequest request, HttpServletResponse response)
+               throws IOException, ServletException {
+       //response.setCharacterEncoding("gb2312");
+      response.setContentType("text/html; charset=gb2312");
+    //  request.setCharacterEncoding("UTF-8");
+
+      request.setCharacterEncoding("gb2312");// 对post方法 有效
+      PrintWriter out = response.getWriter();
+ 
+      
+      try {
+         out.println("<!DOCTYPE html>");
+         out.println("<html><head>");
+         out.println("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
+         out.println("<title>测试 Servlet</title></head>");
+         out.println("<body><h2>输入的表单数据是</h2>");
+ 
+         //从表单中提取用户名
+
+         //new String(userName.getBytes("iso8859-1"),"UTF-8");
+
+         String username = request.getParameter("username");
+         // username= new String(username.getBytes("iso8859-1"),"gb2312");
+         if (username == null
+               || (username = htmlFilter(username.trim())).length() == 0) {
+            out.println("<p>Name: MISSING</p>");
+         } else {
+            out.println("<p>用户名: " + username + "</p>");
+         }
+ 
+         // 从表单中提取密码
+         String password = request.getParameter("password");
+         if (password == null
+               || (password = htmlFilter(password.trim())).length() == 0) {
+            out.println("<p>没有输入密码</p>");
+         } else {
+            out.println("<p>密码是: " + password + "</p>");
+         }
+ 
+         
+         String gender = request.getParameter("gender");
+         // 如果空，提示错误信息
+         if (gender == null) {
+            out.println("<p>要写性别</p>");
+         } else if (gender.equals("m")) {
+            out.println("<p>性别:男</p>");
+         } else {
+            out.println("<p>性别:女</p>");
+         }
+ 
+         
+         String age = request.getParameter("age");
+         if (age == null) {
+            out.println("<p>年龄数据无</p>");
+         } else if (age.equals("1")) {
+            out.println("<p>年龄: &lt; 1 岁</p>");
+         } else if (age.equals("99")) {
+            out.println("<p>年龄: 1 到99 岁</p>");
+         } else {
+            out.println("<p>年龄: &gt; 99 岁</p>");
+         }
+ 
+        
+         String[] languages = request.getParameterValues("language");
+         
+         if (languages == null || languages.length == 0) {
+            out.println("<p>语言: NONE</p>");
+         } else {
+            out.println("<p>语言: ");
+            for (String language : languages) {
+               if (language.equals("c")) {
+                  out.println("C/C++ ");
+               } else if (language.equals("cs")) {
+                  out.println("C# ");
+               } else if (language.equals("java")) {
+                  out.println("Java ");
+               }
+            }
+            out.println("</p>");
+         }
+ 
+         
+         String instruction = request.getParameter("instruction");
+         
+         if (instruction == null
+              || (instruction = htmlFilter(instruction.trim())).length() == 0
+              || instruction.equals("输入你的介绍 内容...")) {
+            out.println("<p>介绍: NONE</p>");
+         } else {
+            out.println("<p>介绍: " + instruction + "</p>");
+         }
+ 
+         
+          
+         
+         Enumeration names = request.getParameterNames();
+         out.println("<p>请求的参数名是: ");
+         if (names.hasMoreElements()) {
+            out.print(htmlFilter(names.nextElement().toString()));
+         }
+         do {
+            out.print(", " + htmlFilter(names.nextElement().toString()));
+         } while (names.hasMoreElements());
+         out.println(".</p>");
+ 
+         // 超链接
+         out.println("<a href='form1.html'>BACK</a>");
+ 
+         out.println("</body></html>");
+      } finally {
+         out.close();  // Always close the output writer
+      }
+   }
+ 
+   // 重定向 POST request to GET request.
+   @Override
+   public void doPost(HttpServletRequest request, HttpServletResponse response)
+               throws IOException, ServletException {
+      doGet(request, response);
+   }
+ 
+   // 过滤Filter 
+   // command injection attack
+   private static String htmlFilter(String message) {
+      if (message == null) return null;
+      int len = message.length();
+      StringBuffer result = new StringBuffer(len + 20);
+      char aChar;
+ 
+      for (int i = 0; i < len; ++i) {
+         aChar = message.charAt(i);
+         switch (aChar) {
+             case '<': result.append("&lt;"); break;
+             case '>': result.append("&gt;"); break;
+             case '&': result.append("&amp;"); break;
+             case '"': result.append("&quot;"); break;
+             default: result.append(aChar);
+         }
+      }
+      return (result.toString());
+   }
+}
+
+  3.编译程序（方法同上）
+  4.配置web.xml 
+      
+	  在原来的web.xml 中增加新的servlet
+	  
+  <web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+	
+ 
+ 
+   <servlet>
+      <servlet-name>HelloWorldServlet</servlet-name>
+      <servlet-class>HelloServlet</servlet-class>
+   </servlet>
+   
+   <servlet>
+      <servlet-name>EchoServletExample</servlet-name>
+      <servlet-class>EchoServlet</servlet-class>
+   </servlet>
+   
+  
+   <servlet-mapping>
+      <servlet-name>HelloWorldServlet</servlet-name>
+      <url-pattern>/sayhello</url-pattern>
+   </servlet-mapping>
+   
+   
+   <servlet-mapping>
+      <servlet-name>EchoServletExample</servlet-name>
+      <url-pattern>/echo</url-pattern>
+   </servlet-mapping>
+   
+</web-app>
+
+ 5.打包发布
+    方法同上 
+	
+	关键点
+	  form1.html 的post,get 方法， 
+	  
+
+四、实验总结及报告
+    认真研究这些代码，将实验过程及碰到的问题写成实验报告。	  
+ 

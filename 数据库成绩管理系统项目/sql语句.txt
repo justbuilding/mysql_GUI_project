@@ -1,0 +1,95 @@
+create database mydb charset gbk;
+use mydb;
+create table goods(
+  stock_id int(10) primary key auto_increment,
+  stock_name varchar(10) unique,
+  stock_num int(10) not null,
+  stock_price float not null,
+  stock_kind varchar(10) not null,
+  stock_expiration_dates date not null,
+  stock_days int(10) not null
+)charset utf8;
+
+create table date(
+  stock_id int(10) primary key auto_increment,
+  stock_expiration_dates date null,
+  stock_days int(10) null
+)charset utf8;
+
+
+create table client(
+  c_id int(10) primary key auto_increment,
+  c_name varchar(10) unique null,
+  c_phone varchar(20) unique null,
+  c_pwd varchar(10) not null
+)charset utf8;
+
+
+
+create table client_pwd(
+  c_id int(10) primary key auto_increment,
+  c_pwd varchar(10) null
+)charset utf8;
+
+
+create table manager(
+  m_name varchar(10) unique,
+  m_pwd varchar(10)
+)charset utf8;
+
+
+create table trade(
+  c_id int(10) not null,
+  stock_id int(10) not null,
+  stock_num int(10) not null,
+  stock_price float not null,
+  total_price float
+)charset utf8;
+
+create table user_trade(
+  c_name varchar(20) not null,
+  stock_name varchar(20) not null,
+  stock_num int(10) not null,
+  stock_price float not null,
+  total_price float
+)charset utf8;
+
+create table user_log(
+  c_id int(10) not null,
+  u_log_datetimes datetime not null
+)charset utf8;
+
+create table manager_log(
+  m_name varchar(20) not null,
+  log_datetimes datetime null
+)charset utf8;
+
+insert into manager values('admin', '123456');
+
+insert into client values(1,'s2',13415111111,'123456');
+insert into client values(2,'s3',13415111112,'123456');
+
+insert into goods values('1', '苹果', 100,20,'水果','1900-01-01',100);
+insert into goods values('2', '火龙果',130,20,'水果','1900-01-01',100);
+insert into goods values('5', '香蕉', 120,20,'水果','1900-01-01',100);
+insert into goods values('6', '菠萝', 120,20,'水果','1900-01-01',100);
+insert into goods values('3', '青瓜', 111,20,'蔬菜','1900-01-01',100);
+insert into goods values('14', '西红柿',111,20,'蔬菜','1900-01-01',100);
+insert into goods values('15', '西蓝花', 111,20,'蔬菜','1900-01-01',100);
+insert into goods values('16', '土豆', 111,20,'蔬菜','1900-01-01',100);
+insert into goods values('17', '茄子', 111,20,'蔬菜','1900-01-01',100);
+insert into goods values('4', '铅笔', 101,20,'学习工具','1900-01-01',100);
+insert into goods values('7', '橡皮擦', 310,20,'学习工具','1900-01-01',100);
+insert into goods values('11', '卷笔刀', 310,20,'学习工具','1900-01-01',100);
+insert into goods values('12', '书桌', 310,20,'学习工具','1900-01-01',100);
+insert into goods values('8', '有线鼠标', 111,20,'办公','1900-01-01',100);
+insert into goods values('9', '有线键盘', 110,20,'办公','1900-01-01',100);
+insert into goods values('10', '无线鼠标', 120,20,'办公','1900-01-01',100);
+insert into goods values('13', '无线键盘', 210,20,'办公','1900-01-01',100);
+
+查询类别为水果的id，一列多行（列子查询：子查询得到的结果是一列数据（一列多行））
+select stock_id from mydb.goods where stock_kind in  (select stock_kind from mydb.goods where stock_kind='水果');
+查询类别为水果的所有行和列，多行多列（表子查询：子查询返回的结果是多行多列）
+Select * from mydb.goods where stock_kind = '水果'; 
+
+

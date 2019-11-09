@@ -1,0 +1,268 @@
+﻿课程设计实验五 综合案例-模型视图控制MVC
+  一、实验目的
+     通过实验了解常用的开发模式-模型视图控制MVC，通过实验掌握综合应用JavaBean、JSP及Servlet 技术实现MVC的方法及技术。
+   二、实验原理
+     模型视图控制（MVC，Model-View-Control)是一重要的设计模式，目的是从表示层(视图）中分离出应用逻辑（控制）和数据（模型），以使开发层次更加清晰。
+	 一般是
+	     1.用JavaBean(一种特殊的Java类）表达数据模型，以便隐藏数据操作的细节。
+	     2.用JSP表达表示层-视图，在客户端与客户交互。
+		 3.用Servlet实现应用逻辑，作为程序的控制枢纽，控制数据模型及表示层
+
+  三、实验平台
+       Win7, mysql >=5.5,jdk >=7 ，tomcat >=8
+   
+  四、实验内容及方法
+     (一）在mysql 平台上创建数据库 Testdb2
+	     mysqld --console
+		 
+	     mysql -u root -p
+		 password:
+		 密码为空
+		 运行下列脚本
+		 
+Create database Testdb2 default character set gbk;
+use Testdb2;
+create table products(
+	id int AUTO_INCREMENT,
+	category char(6),
+	ProductName varchar(20),
+	quantity int,
+	price float,
+	Primary key( id)
+);
+
+ insert into products values(1001,'钢笔','红色钢笔',500,1.23);
+ insert into products values(1002,'钢笔','蓝色钢笔',800,1.25);
+ insert into products values(1003,'钢笔','黑色钢笔',200,1.26);
+insert into products values(1004,'钢笔','白色钢笔',900,1.27);
+insert into products values(1005,'铅笔','2B铅笔',1000,0.56);
+insert into products values(1006,'铅笔','2H铅笔',600,0.58);
+ 
+ （二）用JDBC数据库连接池连接数据库
+    为了保证系统的性能，在实际应用中都采用数据库连接池连接后台的数据库（上一次实验是采用jdbc直接连接）
+	1.创建连接池上下文文件context.xml
+	在 WebRoot\META-INF目录下建立文件 context.xml
+      内容如下
+	     <?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <Resource
+        name="jdbc/testmvc" type="javax.sql.DataSource"
+        maxActive="100" maxIdle="30" maxWait="10000" 
+        url="jdbc:mysql://localhost:3306/testdb2"
+        driverClassName="com.mysql.jdbc.Driver"
+        username="root" password=""
+    />
+</Context>
+注意：name="jdbc/testmvc",后面的程序将用到此连接名。
+
+  2.创建调用数据库的servlet
+  
+  在src 目录下创建一个servlet 程序 DbPoolTest.java 调用数据库
+...
+import javax.sql.DataSource;
+import javax.naming.*;
+  public class  DbPoolTest extends HttpServlet {
+   DataSource pool;  // 建立数据库连接池对象
+   @Override
+   public void init( ) throws ServletException {   //在servlet 开始init()处
+      try {
+         InitialContext ctx = new InitialContext(); //创建JNDI上下文
+         pool = (DataSource)ctx.lookup("java:comp/env/jdbc/testmvc");  //查找数据源jdbc/testmvc,并创建连接池pool
+        }..
+	
+	 public void doGet(HttpServletRequest request, HttpServletResponse response)
+               throws IOException, ServletException {
+			Connection conn = pool.getConnection();  //从连接池中获得连接对象
+		//以下内容与用jdbc直连方法相同
+           Statement  stmt = conn.createStatement();
+         ResultSet rset = stmt.executeQuery("SELECT productname, category FROM products");
+		 
+   3.配置web.xml 文件，调用servlet
+     在 WebRoot\WEB-INF 目录下创建web.xml
+   
+      <web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+ 
+  <servlet>
+    <servlet-name>JdbcPool</servlet-name>
+    <servlet-class>DbPoolTest</servlet-class>
+  </servlet>
+ 
+  
+  <servlet-mapping>
+    <servlet-name>JdbcPool</servlet-name>
+    <url-pattern>/pooltest</url-pattern>
+  </servlet-mapping>
+ 
+</web-app>   
+
+  4.打包发布
+     1）开启tomcat 服务器
+	     在tomcat bin目录下 输入: startup
+	 2) 检查需要运行的库jar
+	     将mysql-connector-java-5.1.47-bin.jar 放到 WebRoot\WEB-INF\lib 下
+		 在E:\common_lib 下放其他编译需要的库
+	 3) 在项目的根目录下创建buid.xml 文件 (自动编译打包发布的ant脚本	)
+      	build.xml 文件模板由老师提供，根据实际情况修改。
+     4）执行 ant 命令
+  5. 检查
+      localhost:9999/mvctest/pooltest
+
+  如果能显示正确结果，整个测试成功。
+
+  （三）用MVC模式开发购物车
+     在src目录下创建子目录mypkg,用于存放购物车的java 程序包
+	   1.模型model (数据）
+	      ProductDB.java
+		  CartItem.java
+	   2.控制
+	       ControllerServlet.java
+	   3.视图（jsp)
+          在WebRoot目录下建立2个jsp 文件
+          order.jsp
+          checkout.jsp
+		  
+修改web.xml 文件
+	  <servlet>
+        <servlet-name>eCart</servlet-name>
+        <servlet-class>mypkg.ControllerServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>eCart</servlet-name>
+        <url-pattern>/shopping</url-pattern>
+    </servlet-mapping>
+
+
+
+视图jsp与控制器Servlet互动		 
+order.jsp
+  注意到  action="shopping"  与web.xml 中<servlet-mapping> 的 /shopping 一致，即order.jsp 从用户的输入的表单form数据 发送到ControllerServlet
+    
+ <form name="AddForm" action="shopping" method="POST">
+         <input type="hidden" name="todo" value="add">		  
+		  
+在 ControllerServlet.java 中
+
+if (todo.equals("add")) {}
+   //控制器 创建模型
+   CartItem newCartItem = new CartItem(   //控制器创建模型（数据）对象 newCartItem,并且用从jsp 中传递过来的bookID,qty 初始化该对象 
+      Integer.parseInt(request.getParameter("bookID")),   //获得参数bookID,并将文本转变为int
+      Integer.parseInt(request.getParameter("qty")));
+   }
+  
+ //参考模型CartItem.java 
+ public class CartItem {
+   private int prodID; //产品id
+   private int qtyOrdered;  // 订购数量   
+   public CartItem(int prodID, int qtyOrdered) {  //对象初始化
+      this.prodID = prodID;
+      this.qtyOrdered = qtyOrdered;
+   }
+ //
+ 
+ session.setAttribute("cart", theCart);  // binds cart to session
+
+    测试： localhost:9999/mvctest/shopping
+
+	
+	 
+	 
+（四）用MVC 及DAO模式实现对数据库的增删改查 CRUD
+    上面购物车的例子中模型（数据）并没有与数据库相连。如果要与数据库连接，对每个模型（数据，表）需要将访问数据库部分分离出来。
+	DAO (Data Access Object, 数据访问对象）模式就是实现模型与数据及数据访问方法的分离。
+	在src 目录下新建子目录mypkg2
+	
+	 1.模型model (数据）
+	     ProductDB.java 
+		 
+	      Product.java
+		  ProductDAO.java (模型Product的数据访问方法）
+	   2.控制
+	       ControllerServlet.java
+	   3.视图（jsp)
+          在WebRoot目录下建立3个jsp 文件
+          ProductList.jsp
+          ProductForm.jsp    
+	      Error.jsp (错误提示）
+	
+	   	  
+	  标准模型的类 实体类 product
+	    包括属性，初始化、方法
+		其中属性
+	protected int id;
+	protected String productname;
+	protected String category;
+	protected float price;
+        初始化-多态
+		 public Product() {}
+		 public Product(int id) {..}
+		 public Product(int id, String productname, String category, float price) {..}
+		 public Product(String productname, String category, float price) {..}
+	 方法（针对每个属性）
+         get方法
+		    public int getId() {return id;}
+			....
+		 set方法
+		    public void setId(int id) {this.id = id;}
+		
+    DAO模式 ProductDAO
+	  
+	  数据库连接方法 connect() （通过数据连接池）
+	  
+	  数据库操作方法 针对每个数据模型
+	    
+		 Product getBook(int id){} // 通过id 获得相关数据
+	     List<Product> listAllBooks(){}    //列出所有数据
+		 boolean insertBook(Product product){..} // 插入数据 
+		 boolean updateBook(Product product) {} //更新数据
+	     boolean deleteBook(Product product){} //删除数据
+		 
+		 
+		 修改web.xml 
+		 <servlet>
+		<servlet-name>ControllerServlet</servlet-name>
+		<servlet-class>mypkg2.ControllerServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>ControllerServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	
+	
+	   增加标准标签库
+	     将 jstl-1.2.jar, standard-1.1.2.jar 放置到lib 目录下
+		
+		ProductForm.jsp
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<c:if test="${product
+
+ProductList.jsp
+
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<c:forEach var="product" items="${listBook}">
+                <tr>
+                    <td><c:out value="${product.id}" /></td>
+                    <td><c:out value="${product.productname}" /></td>
+                    <td><c:out value="${product.category}" /></td>
+                    <td><c:out value="${product.price}" /></td>
+                   
+		 
+		 
+		 打包发布
+		ant clean
+        ant 		
+		 
+		 测试 
+		 http://localhost:8080/mvctest/
+		 
+		
+
+五、扩展实验
+   参考(四）方法，用DAO 模式改造（三）的购物车程序，并且将（三）、（四）整合成一个完整的程序。
+
+   
+		 

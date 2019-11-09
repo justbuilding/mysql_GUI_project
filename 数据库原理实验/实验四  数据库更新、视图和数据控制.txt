@@ -1,0 +1,127 @@
+实验四  数据库更新、视图和数据控制
+一、实验目的
+    通过实验掌握数据库更新的方法和完整性约束的概念以及视图建立和操作方法。掌握SQL SERVER的数据控制和安全性设计的基本方法, 存储过程的建立和使用方法。
+二、实验原理
+  1、插入数据
+     INSERT 
+     INTO<表名〉[<属性列1〉[,<属性列2〉...)]
+      VALUES(<常量1>[,<常量2>]...)
+  2、修改数据
+     UPDATE <表名>
+     SET<列名〉=<表达式〉[，<列名〉=<表达式〉]...
+     [WHERE<条件〉]
+  3. 删除数据
+     DELETE
+     FROM<表名>
+     [WHERE<条件>
+  4. 建立视图
+    CREATE VIEW <视图名〉[（列名〉[，（列名〉]...
+    AS <子查询〉
+    [WITH CHECK OPTION]
+  5. 授权
+     GRANT<权限>[，<权限>]...
+        ON<对象类型〉<对象名>]
+        TO<用户> [，<用户>]...
+     [WITH GRANT OPTION]
+  6.
+
+三、实验内容和方法
+ （一）数据库更新
+  1. 在school数据库中，确保表之间已经建立关系，用企业管理器建立数据库的关系图(Diagrams)
+  2. 在course 表中删除cno=1的记录，有什么结果？
+  3. 在关系图(Diagrams)中编辑course表和 sc表之间的关系，选择级联删除相关记录(cascade delete related records)
+    重复2的操作，观察course 表和 sc表的变化，有什么结果，为什么？
+  4. 将course表和sc表的课程号为2的都改为22，如何做？（提示：在Diagrams中编辑course表和 sc表之间的关系，选择级联更新相关记录cascade update related fields)
+   观察并记录结果。
+  5. 在SC表中，
+    （1）将95002同学的成绩都减少10%
+    （2） 课程号为3的改为33
+    都有什么结果？为什么？
+  6.
+     （1） 在STUDENT表中插入一条新纪录：
+   	95006    	李三	男        	21	IS
+     （2）在SC表中插入一条新纪录：
+           	95008     	3         	80
+               都有什么结果？为什么？如何完成上述操作？
+（二）建立新用户和数据控制管理
+  1. 企业管理器-->安全(security)-->登录(logins)
+     建立两个新用户:用户名stu1,密码stu1和用户名stu2,密码stu2
+     缺省数据库（default database） 为school，数据库访问(database access)选择school
+   2.企业管理器-->数据库（database）-->school-->属性（property）观察结果
+   3. 查询分析器（SQL Query Analyzer）-->用超级用户SA登录
+
+      建立存储过程sp1
+create procedure sp1 as 
+grant create view to stu2
+grant select,update,insert,delete on student to stu2
+grant select,update,insert,delete on course to stu2
+grant select,update,insert,delete on sc to stu2
+
+建立存储过程sp2
+create procedure sp2 as
+grant select on student to stu1
+grant select on course to stu1
+grant select on sc to stu1
+grant insert on student to stu1,stu2
+grant update(Ccredit) on course to stu1 
+
+建立存储过程sp3
+create procedure sp3 as
+revoke select on student from stu1
+revoke select on course from stu1
+revoke select on sc from stu1
+  4. 企业管理器-->database-->school-->存储过程（stored procedure）观察结果
+    SQL Query Analyzer-->用超级用户登录，执行存储过程sp1, sp2
+   exec sp1
+   exec sp2
+  企业管理器-->database-->school-->属性（property）-->权限(permission)观察结果
+  企业管理器-->database-->school-->student,course 和SC -->property-->权限permission观察结果
+ 5.
+  检验一:
+    (1)在命令行用stu1用户登录
+   （2）在SQL Query Analyzer-->file-->connect以stu2用户登录
+      A.用SC表建立视图
+      B.更新course表将CNO=1的CPNO改变为22
+      C.更新course表将CNO=1的Ccredit改变为22
+      D.用select语句查看结果
+     分析原因.
+   检验二:
+     SQL Query Analyzer-->file-->connect以sa用户登录
+     执行存储过程sp3
+    (1)在命令行用stu1用户登录
+   （2）SQL Query Analyzer-->file-->connect以stu2用户登录
+    用select语句查看student,course和 sc三表有什么结果,为什么?
+
+
+ * 扩展实验
+     一、创建角色role，对角色进行权限分配，将多个用户加入角色，检验用户的权限变化/
+     二、设计实验验证权限的传递及收回。
+
+(三) 视图建立和操作
+
+     1.将查询超过18岁的学生的结果建立视图view1，所有男同学的结果建立view2
+       提示： create view view1 as select * from student where sage>18
+           A.在student中,将CS 改为CC,  view1，view2 有没有同步更改？
+           B.在view1中将女同学改为男同学，student 及view2有没有同步修改？
+  
+
+
+    2. 将查询成绩及格（>=60)的姓名、系名、课程名和成绩的结果建立视图V1
+      然后对视图V1进行update, delete和insert操作,观察student,course和 sc三张基表的变化.
+     提示：
+         
+    create view v1 as
+         select student.sname,student.sdept,course.cname,sc.grade from student,sc,course
+              where student.sno=sc.sno and course.cno=sc.cno
+              and grade>=60
+
+
+
+      A.在student,course和 sc三表中进行update, delete和insert操作(自己设计测试用例),观察V1视图的变化.
+      B.在V1视图中进行update, delete和insert操作(自己设计测试用例),观察student,course和 sc三张基表的变化.
+
+    3.将查询超过平均成绩的学号、课程号及成绩的结果建立一个视图V2 
+        提示：   create view v2 as select sno, cno,grade from sc where grade >(select avg(grade) from sc)     
+      A.在sc表中进行update, delete和insert操作(自己设计测试用例),观察V2视图的变化.
+      B.在V2视图中进行update, delete和insert操作(自己设计测试用例),观察sc基表的变化，并且分析原因.
+
